@@ -15,8 +15,23 @@ def connect():
     while wlan.isconnected() == False:
         print('Waiting for connection...')
         sleep(1)
-        
+    ip = wlan.ifconfig()[0]
+    print(f'Connected on {ip}')
+    return ip
+
+
+def open_socket(ip):
+    # Open a socket
+    address = (ip, 80)
+    connection = socket.socket()
+    connection.bind(address)
+    connection.listen(1)
+    return connection
+
+
 try:
-    connect()
+    ip=connect()
+    connection = open_socket(ip)
+    
 except KeyboardInterrupt:
     machine.reset()
