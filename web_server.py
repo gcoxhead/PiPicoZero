@@ -1,11 +1,15 @@
 import network
 import socket
 from time import sleep
-from picozero import pico_temp_sensor, pico_led
+from picozero import pico_temp_sensor, pico_led, LED
 import machine
 
 ssid = 'VM7274398'
 password = 'tn5Qpstxz7fx'
+
+redLED = LED(2) # Use GP2
+insideTemp = 0
+humidity = 0
 
 def connect():
     #Connect to WLAN
@@ -28,19 +32,36 @@ def open_socket(ip):
     connection.listen(1)
     return connection
 
-def webpage(temperature, state):
+def webpage(processorTemp, insideTemp, state, humidity):
     #Template HTML
     html = f"""
             <!DOCTYPE html>
             <html>
             <form action="./lighton">
             <input type="submit" value="Light on" />
+            
             </form>
+            
             <form action="./lightoff">
             <input type="submit" value="Light off" />
+            
             </form>
+            
+            <form action="./redlighton">
+            <input type="submit" value="Red Light on" />
+            </form>
+            
+            
+            <form action="./redlightoff">
+            <input type="submit" value="Red Light off" />
+            </form>
+            
+            
+            
             <p>LED is {state}</p>
-            <p>Temperature is {temperature}</p>
+            <p>Processor Temperature is {processorTemp}</p>
+            <p>Inside Temperature is {insideTemp}</p>
+            <p>Humidity is {humidity}</p>
             </body>
             </html>
             """
@@ -50,7 +71,9 @@ def serve(connection):
     #Start a web server
     state = 'OFF'
     pico_led.off()
-    temperature = 0
+    processorTemp = 0
+    insideTemp = 0
+    humidity = 0
     
     while True:
         client = connection.accept()[0]
@@ -66,7 +89,12 @@ def serve(connection):
         elif request =='/lightoff?':
             pico_led.off()
             state='OFF'
-        temperature = pico_temp_sensor.temp
+        elif request == '/redlighton?':
+            redLED.on()
+        elif request == '/redlightoff?';
+            redLED.off()
+            
+        processorTemp = pico_temp_sensor.temp
         print(request)
         
         html = webpage(temperature, state)
